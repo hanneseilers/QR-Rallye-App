@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">QR-Rallye</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="solution_title">Lösung</string>
+    <string name="solution_title2">Lösung:</string>
+    <string name="solution_submit">Lösung abgeben</string>
+    <string name="solution_ok">Lösung richtig!</string>
+    <string name="solution_false">Lösung NICHT korrekt.</string>
+    <string name="scan_code">QR Code scannen</string>
+    <string name="list_clear">Liste löschen</string>
+    <string name="list_title">Eingelesene QR Codes</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_groupname">Gruppenname:</string>
+    <string name="settings_groupname_default">Default</string>
+    <string name="dialog_snippet_timeout">Du musst noch ein wenig warten bevor du den nächsten QR-Code einlsen kannst.</string>
+    <string name="dialog_snippet_eoa">Tut uns Leid. Dieser QR Code enthält keine Informationen.</string>
+    <string name="dialog_snippet_not_online">Diese Runde ist noch nicht verfügbar.</string>
+    <string name="dialog_title_error">Fehler</string>
+    <string name="dialog_rallye_done">Du hast diese Lösung bereits abgegeben.</string>
+    <string name="dialog_button_ok">OK</string>
+    <string name="dialog_button_cancel">Abbrechen</string>
+
+</resources>
