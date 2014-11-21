@@ -104,13 +104,13 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 					
 				case SNIPPET_EOA:
 					(new QRDialog(R.string.dialog_title_error,
-							R.string.dialog_snippet_timeout, R.string.dialog_button_cancel, null))
+							R.string.dialog_snippet_eoa, R.string.dialog_button_cancel, null))
 					.show(MainActivity.INSTANCE.getSupportFragmentManager(), "DIALOG");
 					break;
 					
 				case SNIPPET_TIMEOUT:
 					(new QRDialog(R.string.dialog_title_error,
-							R.string.dialog_snippet_eoa, R.string.dialog_button_cancel, null))
+							R.string.dialog_snippet_timeout, R.string.dialog_button_cancel, null))
 					.show(MainActivity.INSTANCE.getSupportFragmentManager(), "DIALOG");
 					break;
 					
