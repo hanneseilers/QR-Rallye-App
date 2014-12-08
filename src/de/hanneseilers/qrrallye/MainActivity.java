@@ -1,5 +1,8 @@
 package de.hanneseilers.qrrallye;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import com.google.gson.Gson;
 
 import de.hanneseilers.qrrallye.R;
@@ -15,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 
@@ -84,6 +88,58 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 	
 	public QRCodeJson getRallye(){
 		return mRallye;
+	}
+	
+	/**
+	 * Updates the number of solved items
+	 */
+	public void updateSolvedItems(){		
+		(new AsyncTask<Void, Void, String[]>(){
+
+			@Override
+			protected String[] doInBackground(Void... params) {
+				try{
+					
+					// get information about solved and total items
+					if( mRallye != null ){
+						String vUrl = mRallye.getUrl()+"?f=3&rID=" + mRallye.getRallyeID();
+						String vItemsTotal = QRCodeReaderTask.readFromURL(vUrl);				
+						System.out.println("items total: " + vItemsTotal);
+						
+						if( vItemsTotal != null ){
+							vUrl = mRallye.getUrl()+"?f=4&rID=" + mRallye.getRallyeID()
+										+ "&gHash=" + URLEncoder.encode(mGroupHash, "UTF-8");
+							String vItemsSolved = QRCodeReaderTask.readFromURL(vUrl);
+							System.out.println("solved items: " + vItemsSolved);
+							
+							if( vItemsSolved != null ){
+								return new String[]{vItemsSolved, vItemsTotal};
+							}
+						}
+					}
+					
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				
+				return null;
+			}
+			
+			@Override
+			protected void onPostExecute(String[] result) {
+				if( result != null && result.length > 1 ){
+					txtSolutionTitle.setText( getResources().getString(R.string.solution_title)
+							+ " " + result[0] + "/" + result[1] );
+					
+					if( Integer.parseInt(result[1]) - Integer.parseInt(result[0]) <= 0 ){
+						(new QRDialog(R.string.dialog_title_info, R.string.rallye_finished, R.string.dialog_button_ok, null))
+						.show(getSupportFragmentManager(), "Solution");
+						lstScannedItems.removeAllViews();
+					}
+				}
+			}
+			
+		}).execute();		
 	}
 	
 	@Override

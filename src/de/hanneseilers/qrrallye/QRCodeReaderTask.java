@@ -36,44 +36,31 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 				if( vResponse != null
 						&& vResponse.startsWith("{") && vResponse.endsWith("}") ){
 					RallyeInformation vRallye = (new Gson()).fromJson(vResponse, RallyeInformation.class);
-					
-					// get information about solved and total items
-					vUrl = vCode.getUrl()+"?f=3&rID=" + vCode.getRallyeID();
-					vResponse = readFromURL(vUrl);
-					if( vResponse != null ){
-						int vItemsTotal = Integer.parseInt(vResponse);
+							
+					try {
+						// get groupname
+						String vGroupName = MainActivity.INSTANCE.txtGroupname.getText().toString();
+						if( vGroupName.length() == 0 ){
+							vGroupName = MainActivity.INSTANCE.getResources().getString(
+									R.string.settings_groupname_default);
+						}
 						
-						vUrl = vCode.getUrl()+"?f=4&rID=" + vCode.getRallyeID();
+						// get snipped
+						vUrl = vCode.getUrl()+"?f=2&rID=" + vCode.getRallyeID()
+								+ "&gHash=" + URLEncoder.encode(MainActivity.mGroupHash, "UTF-8")
+								+ "&gName=" + URLEncoder.encode(vGroupName, "UTF-8")
+								+ "&n=" + vCode.getSnippetNumber();
 						vResponse = readFromURL(vUrl);
 						if( vResponse != null ){
-							int vItemsSolved = Integer.parseInt(vResponse);
-							
-							try {
-								// get groupname
-								String vGroupName = MainActivity.INSTANCE.txtGroupname.getText().toString();
-								if( vGroupName.length() == 0 ){
-									vGroupName = MainActivity.INSTANCE.getResources().getString(
-											R.string.settings_groupname_default);
-								}
-								
-								// get snipped
-								vUrl = vCode.getUrl()+"?f=2&rID=" + vCode.getRallyeID()
-										+ "&gHash=" + URLEncoder.encode(MainActivity.mGroupHash, "UTF-8")
-										+ "&gName=" + URLEncoder.encode(vGroupName, "UTF-8")
-										+ "&n=" + vCode.getSnippetNumber();
-								vResponse = readFromURL(vUrl);
-								if( vResponse != null ){
-									System.out.println("Snippet: " + vResponse);
-									return new SnippetResponse(vRallye, vResponse, vItemsSolved, vItemsTotal);
-								}
-								
-							} catch (UnsupportedEncodingException e) {
-								e.printStackTrace();
-							}
-							
+							System.out.println("Snippet: " + vResponse);
+							return new SnippetResponse(vRallye, vResponse);
 						}
+						
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
 					}
-				}
+						
+				}				
 			} catch( JsonSyntaxException e ){
 				e.printStackTrace();
 			}
@@ -87,21 +74,10 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 	protected void onPostExecute(SnippetResponse result) {
 		if( result != null ){
 			
-			// set solution title
-			MainActivity.INSTANCE.txtSolutionTitle.setText(
-					MainActivity.INSTANCE.getResources().getString(R.string.solution_title) + " "
-					+ result.getItemsSolved() + "/" + result.getItemsTotal() );
-			
 			// check snippet
 			if( result.getSnippet().startsWith(":") ){
 				
-				switch( Response.valueOf(result.getSnippet().replace(":", "")) ){
-				case RALLEY_DONE:
-					(new QRDialog(R.string.dialog_title_error, R.string.dialog_rallye_done,
-							R.string.dialog_button_cancel, null))
-					.show(MainActivity.INSTANCE.getSupportFragmentManager(), "DIALOG");
-					break;
-					
+				switch( Response.valueOf(result.getSnippet().replace(":", "")) ){					
 				case SNIPPET_EOA:
 					(new QRDialog(R.string.dialog_title_error,
 							R.string.dialog_snippet_eoa, R.string.dialog_button_cancel, null))
@@ -131,6 +107,9 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 				MainActivity.INSTANCE.lstScannedItems.addView(getItemView(result.getSnippet()));
 				
 			}
+			
+			// update solved items
+			MainActivity.INSTANCE.updateSolvedItems();
 			
 		}
 	}

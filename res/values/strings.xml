@@ -8,6 +8,8 @@
     <string name="solution_submit">Submit solution</string>
     <string name="solution_ok">Solution correct!</string>
     <string name="solution_false">Solution NOT correct.</string>
+    <string name="rallye_finished">You finsihed this rallye!</string>
+    <string name="groupname_fail">Enter a groupname with at least 3 characters.</string>
     <string name="scan_code">Scan QR code</string>
     <string name="list_clear">Clear list</string>
     <string name="list_title">Scanned QR codes</string>
@@ -18,7 +20,7 @@
     <string name="dialog_snippet_eoa">Sorry. This QR code doesn\'t contain anything.</string>
     <string name="dialog_snippet_not_online">This item isn\'t available yet.</string>
     <string name="dialog_title_error">Error</string>
-    <string name="dialog_rallye_done">You already finished this run.</string>
+    <string name="dialog_title_info">Information</string>
     <string name="dialog_button_ok">OK</string>
     <string name="dialog_button_cancel">Cancel</string>
 

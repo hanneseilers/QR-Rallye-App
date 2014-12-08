@@ -6,14 +6,10 @@ public class SnippetResponse {
 
 	private RallyeInformation rallye;
 	private String snippet;
-	private int itemsSolved;
-	private int itemsTotal;
 	
-	public SnippetResponse(RallyeInformation aRallye, String aSnippet, int aItemsSolved, int aItemsTotal) {
+	public SnippetResponse(RallyeInformation aRallye, String aSnippet) {
 		rallye = aRallye;
 		snippet = aSnippet;
-		itemsSolved = aItemsSolved;
-		itemsTotal = aItemsTotal;
 	}
 	
 	public String toString(){
@@ -32,20 +28,6 @@ public class SnippetResponse {
 	 */
 	public String getSnippet() {
 		return snippet;
-	}
-
-	/**
-	 * @return the itemsSolved
-	 */
-	public int getItemsSolved() {
-		return itemsSolved;
-	}
-
-	/**
-	 * @return the itemsTotal
-	 */
-	public int getItemsTotal() {
-		return itemsTotal;
 	}
 	
 }

@@ -4,12 +4,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import android.os.AsyncTask;
-import android.widget.Toast;
+import de.hanneseilers.qrrallye.SolutionSubmitTask.ReturnCodes;;
 
-public class SolutionSubmitTask extends AsyncTask<String, Void, Boolean> {
+public class SolutionSubmitTask extends AsyncTask<String, Void, ReturnCodes> {
 
 	@Override
-	protected Boolean doInBackground(String... params) {
+	protected ReturnCodes doInBackground(String... params) {
 		if( params.length > 0 ){
 			String vSolution = params[0];
 			QRCodeJson vCode = MainActivity.INSTANCE.getRallye();
@@ -18,18 +18,21 @@ public class SolutionSubmitTask extends AsyncTask<String, Void, Boolean> {
 				try {
 					
 					// submit solution
+					String vGroupname = MainActivity.INSTANCE.txtGroupname.getText().toString();
+					if( vGroupname == null || vGroupname.length() < 3 ){
+						return ReturnCodes.GROUPNAME_FAIL;
+					}
 					String vUrl = vCode.getUrl() + "?f=5&rID=" + vCode.getRallyeID()
 							+ "&gHash=" + URLEncoder.encode(MainActivity.mGroupHash, "UTF-8")
-							+ "&gName=" + URLEncoder.encode(
-									MainActivity.INSTANCE.txtGroupname.getText().toString(), "UTF-8")
+							+ "&gName=" + URLEncoder.encode(vGroupname, "UTF-8")
 							+ "&S=" + URLEncoder.encode(vSolution, "UTF-8");
 					String vResponse = QRCodeReaderTask.readFromURL(vUrl);
 					if( vResponse != null && vResponse.startsWith(":") ){
 						switch( Response.valueOf(vResponse.replace(":", "")) ){
 						case RALLEY_DONE:
-							return true;
+							return ReturnCodes.RALLYE_DONE;
 						case SOLUTION_OK:
-							return true;
+							return ReturnCodes.SOLUTION_OK;
 						default:
 							break;						
 						}
@@ -41,17 +44,41 @@ public class SolutionSubmitTask extends AsyncTask<String, Void, Boolean> {
 			}
 		}
 		
-		return false;
+		return ReturnCodes.FAIL;
 	}
 	
-	@Override
-	protected void onPostExecute(Boolean result) {
-		if( result ){
-			Toast.makeText(MainActivity.INSTANCE, R.string.solution_ok, Toast.LENGTH_LONG).show();
+	protected void onPostExecute(ReturnCodes result) {
+		if( result == ReturnCodes.SOLUTION_OK ){
 			MainActivity.INSTANCE.lstScannedItems.removeAllViews();
-		} else {
-			Toast.makeText(MainActivity.INSTANCE, R.string.solution_false, Toast.LENGTH_LONG).show();
+			(new QRDialog(R.string.solution_ok, R.string.dialog_title_info, R.string.dialog_button_ok, null))
+				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
 		}
+		else if( result == ReturnCodes.RALLYE_DONE ){
+			(new QRDialog(R.string.rallye_finished, R.string.dialog_title_info, R.string.dialog_button_ok, null))
+				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
+			MainActivity.INSTANCE.lstScannedItems.removeAllViews();
+		}
+		else if( result == ReturnCodes.GROUPNAME_FAIL ){
+			(new QRDialog(R.string.groupname_fail, R.string.dialog_title_error, R.string.dialog_button_ok, null))
+				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
+		}
+		else {
+			(new QRDialog(R.string.solution_false, R.string.dialog_title_error, R.string.dialog_button_ok, null))
+				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
+		}
+		
+		// Update number of solved items
+		MainActivity.INSTANCE.updateSolvedItems();
+	}
+	
+	public enum ReturnCodes{
+		
+		SOLUTION_OK,
+		RALLYE_DONE,
+		FAIL,
+		GROUPNAME_FAIL;
+		
+		
 	}
 
 }

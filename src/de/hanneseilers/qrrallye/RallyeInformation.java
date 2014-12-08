@@ -6,8 +6,6 @@ public class RallyeInformation {
 
 	private int rID;
 	private String rName;
-	private String rStart;
-	private String rEnd;
 	private long rSnippetsDelay;
 	
 	public String toString(){
@@ -26,20 +24,6 @@ public class RallyeInformation {
 	 */
 	public String getName() {
 		return rName;
-	}
-
-	/**
-	 * @return the Start
-	 */
-	public String getStart() {
-		return rStart;
-	}
-
-	/**
-	 * @return the End
-	 */
-	public String getEnd() {
-		return rEnd;
 	}
 
 	/**

@@ -20,7 +20,7 @@ public class QRDialog extends DialogFragment {
 	 * @param aMessage
 	 * @param aTitle
 	 */
-	public QRDialog(int aMessage, int aTitle){
+	public QRDialog(int aTitle, int aMessage){
 		this(aMessage, aTitle, -1, null);
 	}
 	
@@ -31,7 +31,7 @@ public class QRDialog extends DialogFragment {
 	 * @param aPositiveButton
 	 * @param aPositiveButtonListener
 	 */
-	public QRDialog(int aMessage, int aTitle, int aPositiveButton, OnClickListener aPositiveButtonListener){
+	public QRDialog(int aTitle, int aMessage, int aPositiveButton, OnClickListener aPositiveButtonListener){
 		this( aMessage, aTitle, aPositiveButton, -1, aPositiveButtonListener, null );
 	}
 	
@@ -44,7 +44,7 @@ public class QRDialog extends DialogFragment {
 	 * @param aPositveButtonListener
 	 * @param aNegativeButtonListener
 	 */
-	public QRDialog(int aMessage, int aTitle, int aPositiveButton, int aNegativeButton,
+	public QRDialog(int aTitle, int aMessage, int aPositiveButton, int aNegativeButton,
 			OnClickListener aPositveButtonListener, OnClickListener aNegativeButtonListener) {
 		mMessage = aMessage;
 		mTitle = aTitle;
