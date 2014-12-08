@@ -50,20 +50,18 @@ public class SolutionSubmitTask extends AsyncTask<String, Void, ReturnCodes> {
 	protected void onPostExecute(ReturnCodes result) {
 		if( result == ReturnCodes.SOLUTION_OK ){
 			MainActivity.INSTANCE.lstScannedItems.removeAllViews();
-			(new QRDialog(R.string.solution_ok, R.string.dialog_title_info, R.string.dialog_button_ok, null))
+			(new QRDialog(R.string.dialog_title_info, R.string.solution_ok, R.string.dialog_button_ok, null))
 				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
 		}
 		else if( result == ReturnCodes.RALLYE_DONE ){
-			(new QRDialog(R.string.rallye_finished, R.string.dialog_title_info, R.string.dialog_button_ok, null))
-				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
 			MainActivity.INSTANCE.lstScannedItems.removeAllViews();
 		}
 		else if( result == ReturnCodes.GROUPNAME_FAIL ){
-			(new QRDialog(R.string.groupname_fail, R.string.dialog_title_error, R.string.dialog_button_ok, null))
+			(new QRDialog(R.string.dialog_title_error, R.string.groupname_fail, R.string.dialog_button_ok, null))
 				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
 		}
 		else {
-			(new QRDialog(R.string.solution_false, R.string.dialog_title_error, R.string.dialog_button_ok, null))
+			(new QRDialog(R.string.dialog_title_error, R.string.solution_false, R.string.dialog_button_ok, null))
 				.show(MainActivity.INSTANCE.getSupportFragmentManager(), "Solution");
 		}
 		

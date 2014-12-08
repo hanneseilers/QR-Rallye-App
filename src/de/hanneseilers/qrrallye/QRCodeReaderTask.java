@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -25,7 +26,6 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 			
 			// get code
 			arg0[0] = arg0[0].replace("\\", "");
-			System.out.println(arg0[0]);
 			try{
 				QRCodeJson vCode = (new Gson()).fromJson(arg0[0], QRCodeJson.class);
 				MainActivity.INSTANCE.setRallye(vCode);
@@ -40,9 +40,8 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 					try {
 						// get groupname
 						String vGroupName = MainActivity.INSTANCE.txtGroupname.getText().toString();
-						if( vGroupName.length() == 0 ){
-							vGroupName = MainActivity.INSTANCE.getResources().getString(
-									R.string.settings_groupname_default);
+						if( vGroupName.length() < 3 ){
+							return new SnippetResponse(null, ":"+Response.GROUPNAME_ERROR.name());
 						}
 						
 						// get snipped
@@ -52,7 +51,7 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 								+ "&n=" + vCode.getSnippetNumber();
 						vResponse = readFromURL(vUrl);
 						if( vResponse != null ){
-							System.out.println("Snippet: " + vResponse);
+							Log.d(MainActivity.TAG, "Snippet: " + vResponse);
 							return new SnippetResponse(vRallye, vResponse);
 						}
 						
@@ -93,6 +92,12 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 				case SNIPPET_NOT_ONLINE:
 					(new QRDialog(R.string.dialog_title_error,
 							R.string.dialog_snippet_not_online, R.string.dialog_button_cancel, null))
+					.show(MainActivity.INSTANCE.getSupportFragmentManager(), "DIALOG");
+					break;
+					
+				case GROUPNAME_ERROR:
+					(new QRDialog(R.string.dialog_title_error,
+							R.string.groupname_fail, R.string.dialog_button_cancel, null))
 					.show(MainActivity.INSTANCE.getSupportFragmentManager(), "DIALOG");
 					break;
 					
@@ -144,7 +149,7 @@ public class QRCodeReaderTask extends AsyncTask<String, Void, SnippetResponse>{
 	public static String readFromURL(String aUrl){
 		try {
 			
-			System.out.println("Read from " + aUrl);
+			Log.d(MainActivity.TAG, "Read from " + aUrl);
 			URL vUrl = new URL(aUrl);
 			URLConnection vConnection = vUrl.openConnection();
 			BufferedReader vInputReader = new BufferedReader(new InputStreamReader( vConnection.getInputStream() ));

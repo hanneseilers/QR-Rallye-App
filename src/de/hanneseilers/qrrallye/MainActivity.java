@@ -1,5 +1,11 @@
 package de.hanneseilers.qrrallye;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -10,6 +16,7 @@ import de.hanneseilers.qrrallye.zxing.IntentIntegrator;
 import de.hanneseilers.qrrallye.zxing.IntentResult;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -24,9 +31,12 @@ import android.provider.Settings.Secure;
 
 public class MainActivity extends ActionBarActivity implements OnClickListener {
 
-	private static final String KEY_GROUPHASH = "de.hanneseilers.qrrallye.grouphash";
-	private static final String KEY_QR_CODE_JSON = "de.hanneseilers.qrrallye.qrcodejson";
-	private static final String KEY_SCANNED_DATA = "de.hanneseilers.qrrallye.scanneddata";
+//	private static final String KEY_GROUPHASH = "de.hanneseilers.qrrallye.grouphash";
+//	private static final String KEY_QR_CODE_JSON = "de.hanneseilers.qrrallye.qrcodejson";
+//	private static final String KEY_SCANNED_DATA = "de.hanneseilers.qrrallye.scanneddata";
+	private static final String BACKUP_FILE = "backup";
+	
+	public static final String TAG = MainActivity.class.getName();
 	
 	public static String mGroupHash = null;
 	public static MainActivity INSTANCE = null;
@@ -65,21 +75,40 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 		btnScan.setOnClickListener(this);
 		btnSubmit.setOnClickListener(this);
 		
-		// restore state
-		if( savedInstanceState != null ){
-			if( savedInstanceState.containsKey(KEY_GROUPHASH) )
-				mGroupHash = savedInstanceState.getString(KEY_GROUPHASH);
-			if( savedInstanceState.containsKey(KEY_QR_CODE_JSON) )
-				mRallye = (new Gson()).fromJson(savedInstanceState.getString(KEY_QR_CODE_JSON), QRCodeJson.class);
-			if( savedInstanceState.containsKey(KEY_SCANNED_DATA) ){
-				for( String snippet : savedInstanceState.getString(KEY_SCANNED_DATA).split(";") ){
-					lstScannedItems.addView( QRCodeReaderTask.getItemView(snippet) );
+		INSTANCE = this;
+		
+		// restore backup
+		try {
+			
+			BufferedReader vBackup = new BufferedReader( new FileReader( new File(getFilesDir(), BACKUP_FILE) ) );
+			
+			String vLine;
+			if( (vLine = vBackup.readLine()) != null ){
+				mGroupHash = vLine;
+			}
+			
+			if( (vLine = vBackup.readLine()) != null ){
+				txtGroupname.setText( vLine );
+			}
+			
+			if( (vLine = vBackup.readLine()) != null ){
+				mRallye = (new Gson()).fromJson(vLine, QRCodeJson.class);
+			}
+			
+			if( (vLine = vBackup.readLine()) != null ){
+				for( String vSnippet : vLine.split(";") ){
+					lstScannedItems.addView( QRCodeReaderTask.getItemView(vSnippet) );
 				}
 			}
-				
+			
+			vBackup.close();
+			
+		} catch (FileNotFoundException e) {
+			Log.i(TAG, "No backup file found");
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		INSTANCE = this;
 	}
 	
 	public synchronized void setRallye(QRCodeJson vRallye){
@@ -104,13 +133,11 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 					if( mRallye != null ){
 						String vUrl = mRallye.getUrl()+"?f=3&rID=" + mRallye.getRallyeID();
 						String vItemsTotal = QRCodeReaderTask.readFromURL(vUrl);				
-						System.out.println("items total: " + vItemsTotal);
 						
 						if( vItemsTotal != null ){
 							vUrl = mRallye.getUrl()+"?f=4&rID=" + mRallye.getRallyeID()
 										+ "&gHash=" + URLEncoder.encode(mGroupHash, "UTF-8");
 							String vItemsSolved = QRCodeReaderTask.readFromURL(vUrl);
-							System.out.println("solved items: " + vItemsSolved);
 							
 							if( vItemsSolved != null ){
 								return new String[]{vItemsSolved, vItemsTotal};
@@ -161,18 +188,32 @@ public class MainActivity extends ActionBarActivity implements OnClickListener {
 		}
 	}
 	
-
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putString(KEY_GROUPHASH, mGroupHash);
-		if( mRallye != null ) outState.putString(KEY_QR_CODE_JSON, mRallye.toString());
-		String vData = "";
-		for( int i=0; i < lstScannedItems.getChildCount(); i++ ){
-			TextView vTxt = (TextView) lstScannedItems.getChildAt(i);
-			if( vData.length() > 0 ) vData += ";";
-			vData += vTxt.getText().toString();
-		}
-		outState.putString(KEY_SCANNED_DATA, vData);
+	protected void onDestroy() {
+		Log.i(TAG, "Save backup");
+		
+		// save data to file
+		try {
+			
+			PrintWriter vBackup = new PrintWriter( new File(getFilesDir(), BACKUP_FILE) );
+			vBackup.println( mGroupHash );
+			vBackup.println( txtGroupname.getText().toString() );
+			vBackup.println( mRallye.toString() );
+			
+			String vData = "";
+			for( int i=0; i < lstScannedItems.getChildCount(); i++ ){
+				TextView vTxt = (TextView) lstScannedItems.getChildAt(i);
+				if( vData.length() > 0 ) vData += ";";
+				vData += vTxt.getText().toString().replace("\n", "");
+			}	
+			vBackup.println( vData );
+			
+			vBackup.close();
+			
+		} catch (FileNotFoundException e) {
+			Log.e(TAG, "Could not write backup file");
+		} 
+		
+		super.onDestroy();
 	}
 }
